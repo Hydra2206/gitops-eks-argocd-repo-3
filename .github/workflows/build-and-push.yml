@@ -35,6 +35,6 @@ jobs:
           IMAGE_NAME: gitops-app
         run: |
           IMAGE_TAG=${GITHUB_SHA::8}
-          docker build -t $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG ./services/frontend
+          docker build -t $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG ./app/services/frontend
           docker push $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG" >> $GITHUB_OUTPUT
