@@ -32,9 +32,9 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_NAME: ${{ secrets.ECR_REPOSITORY }}
+          REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
         run: |
           IMAGE_TAG=${GITHUB_SHA::8}
-          docker build -t $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG ./app/services/frontend
-          docker push $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
-          echo "image=$ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          docker build -t $ECR_REGISTRY/$REPOSITORY:$IMAGE_TAG ./app/services/frontend
+          docker push $ECR_REGISTRY/$REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
