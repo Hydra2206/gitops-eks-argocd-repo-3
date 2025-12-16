@@ -3,8 +3,6 @@ name: Build and push to ECR
 on:
   workflow_dispatch: {}
   push:
-    paths:
-      - 'services/**'
     branches:
       - main
 
