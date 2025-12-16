@@ -38,3 +38,27 @@ jobs:
           docker build -t $ECR_REGISTRY/$REPOSITORY:$IMAGE_TAG ./app/services/frontend
           docker push $ECR_REGISTRY/$REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Generate kubeconfig                     # you do need a kubeconfig file to interact with the cluster after it exists.
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/.kube"
+          aws eks update-kubeconfig \
+            --name "${{ secrets.CLUSTER_NAME }}" \
+            --region "${{ secrets.AWS_REGION }}" \
+            --kubeconfig "$GITHUB_WORKSPACE/.kube/config"
+
+          echo "KUBECONFIG=$GITHUB_WORKSPACE/.kube/config" >> $GITHUB_ENV
+
+      - name: Update deployment image   # Updates the Kubernetes deployment YAML to use the newly built image.
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+          IMAGE_TAG: ${GITHUB_SHA::8}
+        run: |
+          IMAGE_URI=${REGISTRY}/${REPOSITORY}:${IMAGE_TAG}
+          sed -i "s|IMAGE_PLACEHOLDER|$IMAGE_URI|g" ./app/K8s/deployment.yaml
+
+      - name: Deploy to EKS
+        run: |
+          kubectl apply -f ./app/k8s/deployment.yaml
+          kubectl apply -f ./app/k8s/service.yml
